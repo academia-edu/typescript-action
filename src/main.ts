@@ -29,7 +29,6 @@ async function run() {
 	}
 
 	try {
-		console.log('Using Typescript version:');
 		await exec('node', [args[0], '--version']);
 		await exec('node', args);
 	} catch (error) {
