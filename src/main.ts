@@ -7,6 +7,18 @@ async function run() {
 	const build = getInput('build');
 	const executable = getInput('executable');
 	console.log(`##[add-matcher]${join(__dirname, '..', '.github', 'tsc.json')}`);
+
+	const executablePath = `${join(process.cwd(), 'node_modules/.bin', executable)}`;
+
+	const versionArgs = [executablePath, '--version'];
+
+	try {
+		console.log('Using Typescript version:');
+		await exec('node', versionArgs);
+	} catch (error) {
+		setFailed('');
+	}
+
 	const args = [
 		`${join(process.cwd(), 'node_modules/.bin', executable)}`,
 		'--noEmit',
@@ -26,6 +38,7 @@ async function run() {
 		// Change --incremental false for --incremental true, as incremental builds are required for composite builds
 		args.splice(-1, 1, 'true');
 	}
+
 	try {
 		await exec('node', args);
 	} catch (error) {
