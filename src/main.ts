@@ -8,17 +8,6 @@ async function run() {
 	const executable = getInput('executable');
 	console.log(`##[add-matcher]${join(__dirname, '..', '.github', 'tsc.json')}`);
 
-	const executablePath = `${join(process.cwd(), 'node_modules/.bin', executable)}`;
-
-	const versionArgs = [executablePath, '--version'];
-
-	try {
-		console.log('Using Typescript version:');
-		await exec('node', versionArgs);
-	} catch (error) {
-		setFailed('');
-	}
-
 	const args = [
 		`${join(process.cwd(), 'node_modules/.bin', executable)}`,
 		'--noEmit',
@@ -40,6 +29,8 @@ async function run() {
 	}
 
 	try {
+		console.log('Using Typescript version:');
+		await exec('node', [args[0], '--version']);
 		await exec('node', args);
 	} catch (error) {
 		setFailed('');
