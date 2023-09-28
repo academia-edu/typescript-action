@@ -8,28 +8,29 @@ async function run() {
 	const executable = getInput('executable');
 	console.log(`##[add-matcher]${join(__dirname, '..', '.github', 'tsc.json')}`);
 
-	const args = [
-		`${join(process.cwd(), 'node_modules/.bin', executable)}`,
-		'--noEmit',
-		'--noErrorTruncation',
-		'--pretty',
-		'false',
-		'--incremental',
-		'false',
-	];
+	const tscPath = `${join(process.cwd(), 'node_modules/.bin', executable)}`;
+
+	let args = ['--max-old-space-size=8192', tscPath, '--pretty', 'false'];
+
 	if (project) {
-		args.push('--project', project);
+		args = [...args, '--project', project];
 	}
 	if (build) {
-		args.splice(1, 0, '--build', build);
-		// Remove --noEmit and --noErrorTruncation, which are unsupported with --build
-		args.splice(3, 2);
-		// Change --incremental false for --incremental true, as incremental builds are required for composite builds
-		args.splice(-1, 1, 'true');
+		// --noEmit and --noErrorTruncation are unsupported with --build,
+		// and incremental is required for composite builds
+		args = [...args, '--build', build, '--incremental', 'true'];
+	} else {
+		args = [
+			...args,
+			'--noEmit',
+			'--noErrorTruncation',
+			'--incremental',
+			'false',
+		];
 	}
 
 	try {
-		await exec('node', [args[0], '--version']);
+		await exec('node', [tscPath, '--version']);
 		await exec('node', args);
 	} catch (error) {
 		setFailed('');
